@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lipify/screens/sentence_structure_screen.dart';
+import 'package:lipify/styles.dart';
 
 class HomeScreen extends StatelessWidget {
   @override
@@ -19,7 +20,7 @@ class HomeScreen extends StatelessWidget {
                 ),
                 Text(
                   'Welcome to Lipify\nYour Lip Reading Assistant',
-                  style: TextStyle(fontSize: 30.0),
+                  style: kHomeScreenTextStyle,
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -29,16 +30,14 @@ class HomeScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         elevation: 4.0,
-        icon: const Icon(Icons.record_voice_over),
-        label: const Text('Sentence Structure'),
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => SentenceStructureScreen(),
-            ),
-          );
-        },
+        icon: Icon(Icons.record_voice_over),
+        label: Text('Sentence Structure'),
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SentenceStructureScreen(),
+          ),
+        ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
