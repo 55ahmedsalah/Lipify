@@ -1,8 +1,8 @@
-import 'package:camera/camera.dart';
+// import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:lipify/components/category_button.dart';
 import 'package:lipify/components/help_dialog.dart';
-import 'package:lipify/controllers/lipify_camera_controller.dart';
+// import 'package:lipify/controllers/lipify_camera_controller.dart';
 import 'package:lipify/screens/camera_screen.dart';
 
 class SentenceStructureScreen extends StatefulWidget {
