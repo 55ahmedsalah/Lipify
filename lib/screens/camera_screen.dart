@@ -77,8 +77,8 @@ class _CameraScreenState extends State<CameraScreen>
       if (controller.value.isRecordingVideo) {
         onVideoRecordStop();
 
-        final dir = Directory(dirPath);
-        dir.deleteSync(recursive: true);
+        // final dir = Directory(dirPath);
+        // dir.deleteSync(recursive: true);
       }
       disposeControllers();
     } else if (state == AppLifecycleState.resumed) {
