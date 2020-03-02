@@ -14,12 +14,17 @@ class HomeScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
+                Text(
+                  'Welcome to Lipify',
+                  style: kHomeScreenTextStyle,
+                  textAlign: TextAlign.center,
+                ),
                 Image.asset(
                   'images/logo.png',
                   width: 200.0,
                 ),
                 Text(
-                  'Welcome to Lipify\nYour Lip Reading Assistant',
+                  'Your Lip Reading Assistant',
                   style: kHomeScreenTextStyle,
                   textAlign: TextAlign.center,
                 ),

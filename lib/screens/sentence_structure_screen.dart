@@ -1,8 +1,5 @@
-// import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:lipify/components/category_button.dart';
 import 'package:lipify/components/help_dialog.dart';
-// import 'package:lipify/controllers/lipify_camera_controller.dart';
 import 'package:lipify/screens/camera_screen.dart';
 
 class SentenceStructureScreen extends StatefulWidget {
@@ -12,18 +9,32 @@ class SentenceStructureScreen extends StatefulWidget {
 }
 
 class _SentenceStructureScreenState extends State<SentenceStructureScreen> {
+  List<Chip> _sentenceStructureChips = [];
+  List<Chip> _sentenceStructureCameraChips = [];
+  Map<String, bool> _pressed = {
+    'Command': false,
+    'Color': false,
+    'Preposition': false,
+    'Letter': false,
+    'Digit': false,
+    'Adverb': false
+  };
+
+  void _showAboutAlertDialog() {
+    showDialog(
+      context: context,
+      builder: (_) => HelpDialog(),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    // List<Chip> _sentenceStructureChips = [];
-    List<Text> _sentenceStructure = [];
-
-    void _showAboutAlertDialog() {
-      showDialog(
-        context: context,
-        builder: (_) => HelpDialog(),
-      );
-    }
-
+    setState(() {});
     return Scaffold(
       appBar: AppBar(
         title: Text('Sentence Structure'),
@@ -32,6 +43,7 @@ class _SentenceStructureScreenState extends State<SentenceStructureScreen> {
             icon: Icon(Icons.help),
             onPressed: () {
               _showAboutAlertDialog();
+              print(_sentenceStructureChips);
             },
           ),
         ],
@@ -49,25 +61,29 @@ class _SentenceStructureScreenState extends State<SentenceStructureScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
-                  CategoryButton('Command', _sentenceStructure),
-                  CategoryButton('Color', _sentenceStructure),
-                  CategoryButton('Preposition', _sentenceStructure),
+                  _raisedButton('Command'),
+                  _raisedButton('Color'),
+                  _raisedButton('Preposition'),
                 ],
               ),
               SizedBox(height: 5.0),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
-                  CategoryButton('Letter', _sentenceStructure),
-                  CategoryButton('Digit', _sentenceStructure),
-                  CategoryButton('Adverb', _sentenceStructure),
+                  _raisedButton('Letter'),
+                  _raisedButton('Digit'),
+                  _raisedButton('Adverb'),
                 ],
               ),
               SizedBox(height: 5.0),
               Container(
-                height: 100.0,
-                child: Row(
-                  children: _sentenceStructure.toList(),
+                height: 70.0,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: _sentenceStructureChips,
+                  ),
                 ),
               ),
             ],
@@ -78,14 +94,53 @@ class _SentenceStructureScreenState extends State<SentenceStructureScreen> {
         elevation: 4.0,
         icon: const Icon(Icons.videocam),
         label: const Text('Open Camera'),
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => CameraScreen(),
-          ),
-        ),
+        onPressed: _sentenceStructureChips.length > 0
+            ? () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        CameraScreen(_sentenceStructureCameraChips),
+                  ),
+                )
+            : null,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    );
+  }
+
+  Widget _raisedButton(String category) {
+    return RaisedButton(
+      onPressed: _pressed[category]
+          ? null
+          : () => setState(
+                () {
+                  _sentenceStructureCameraChips
+                      .add(Chip(label: Text(category)));
+                  _sentenceStructureChips.add(
+                    Chip(
+                      deleteIcon: Icon(Icons.close),
+                      deleteButtonTooltipMessage: 'Cancel',
+                      deleteIconColor: Colors.red,
+                      label: Text(category),
+                      onDeleted: () {
+                        _pressed[category] = false;
+                        _sentenceStructureCameraChips.removeWhere((Chip chip) {
+                          return chip.label.toString() ==
+                              Text(category).toString();
+                        });
+                        _sentenceStructureChips.removeWhere((Chip chip) {
+                          return chip.label.toString() ==
+                              Text(category).toString();
+                        });
+                        setState(() {});
+                      },
+                      elevation: 2.0,
+                    ),
+                  );
+                  _pressed[category] = true;
+                },
+              ),
+      child: Text(category),
     );
   }
 }

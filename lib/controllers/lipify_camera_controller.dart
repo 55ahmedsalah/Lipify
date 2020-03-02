@@ -1,14 +1,11 @@
-/*
-import 'dart:async';
-import 'dart:io';
-
 import 'package:camera/camera.dart';
-import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:video_player/video_player.dart';
 
 class LipifyCameraController {
+  static Future<CameraDescription> getCamera(int index) async {
+    // Obtain a list of the available cameras on the device.
+    var cameras = await availableCameras();
 
+    // Get a specific camera from the list of available cameras.
+    return cameras[index];
+  }
 }
-
-*/
