@@ -1,16 +1,17 @@
 import 'dart:async';
 import 'dart:io';
 
-// import 'package:lipify/screens/prediction_result_screen.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:lipify/controllers/lipify_camera_controller.dart';
+import 'package:lipify/screens/prediction_result_screen.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:video_player/video_player.dart';
 
 class CameraScreen extends StatefulWidget {
   final List<Chip> sentenceStructureCameraChips;
   CameraScreen(this.sentenceStructureCameraChips);
+
   @override
   _CameraScreenState createState() {
     return _CameraScreenState();
@@ -19,15 +20,18 @@ class CameraScreen extends StatefulWidget {
 
 class _CameraScreenState extends State<CameraScreen>
     with WidgetsBindingObserver {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   CameraController _controller;
   CameraDescription _camera;
   Future<void> _initializeControllerFuture;
-  List<CameraDescription> _cameras = [];
+  int _videoIndex = 0;
+  // List<CameraDescription> _cameras = [];
+  List<String> _videos = [];
   String _videoPath;
   VideoPlayerController _videoController;
   VoidCallback _videoPlayerListener;
 
-  void initializeCamera(int cameraIndex) async {
+  void _initializeCamera(int cameraIndex) async {
     // To display the current output from the Camera,
     // Get camera
     _camera = await LipifyCameraController.getCamera(cameraIndex);
@@ -38,7 +42,7 @@ class _CameraScreenState extends State<CameraScreen>
       // Get a specific camera from the list of available cameras.
       _camera,
       // Define the resolution to use.
-      ResolutionPreset.low,
+      ResolutionPreset.max,
       // Disable audio.
       enableAudio: false,
     );
@@ -61,7 +65,18 @@ class _CameraScreenState extends State<CameraScreen>
   void logError(String code, String message) =>
       print('Error: $code\nError Message: $message');
 
-  void getCameras() async {
+  void _showInSnackBar(String message) {
+    _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  void _showCameraException(CameraException e) {
+    logError(e.code, e.description);
+    _showInSnackBar('Error: ${e.code}\n${e.description}');
+  }
+
+  /*
+
+  void _getCameras() async {
     try {
       _cameras = await availableCameras();
     } on CameraException catch (e) {
@@ -75,23 +90,21 @@ class _CameraScreenState extends State<CameraScreen>
       );
     }
   }
+  */
 
-  void disposeControllers() async {
+  void _disposeControllers() async {
     await _controller?.dispose();
     await _videoController?.dispose();
   }
 
-  void _showInSnackBar(String message) {
-    _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text(message)));
-  }
-
+  // Video Capturing Functions
   void _onNewCameraSelected(CameraDescription cameraDescription) async {
     if (_controller != null) {
       await _controller.dispose();
     }
     _controller = CameraController(
       cameraDescription,
-      ResolutionPreset.medium,
+      ResolutionPreset.max,
       enableAudio: false,
     );
 
@@ -114,21 +127,25 @@ class _CameraScreenState extends State<CameraScreen>
     }
   }
 
-  void _onVideoRecordButtonPressed() {
-    _startVideoRecording().then((String filePath) {
+  void _onVideoRecordButtonPressed(String category) {
+    _startVideoRecording(category).then((String filePath) {
       if (mounted) setState(() {});
       if (filePath != null) {
-        // showInSnackBar('Saving video to $filePath');
-        Future.delayed(Duration(seconds: 1), () {
-          if (_controller != null &&
-              _controller.value.isInitialized &&
-              _controller.value.isRecordingVideo) _onVideoRecordStop();
-        });
+        // File already exists or another camera exception is thrown
+        _videos.add(filePath);
+        Future.delayed(
+          Duration(seconds: 1),
+          () {
+            if (_controller != null &&
+                _controller.value.isInitialized &&
+                _controller.value.isRecordingVideo) _onVideoRecordStop();
+          },
+        );
       }
     });
   }
 
-  Future<String> _startVideoRecording() async {
+  Future<String> _startVideoRecording(String category) async {
     if (!_controller.value.isInitialized) {
       _showInSnackBar('Error: select a camera first.');
       return null;
@@ -137,8 +154,8 @@ class _CameraScreenState extends State<CameraScreen>
     final Directory extDir = await getApplicationDocumentsDirectory();
     final String dirPath = '${extDir.path}/Movies/flutter_test';
     await Directory(dirPath).create(recursive: true);
-    final String filePath =
-        '$dirPath/${DateTime.now().millisecondsSinceEpoch.toString()}.mp4';
+    _videoIndex++;
+    final String filePath = '$dirPath/${_videoIndex}_$category.mp4';
 
     if (_controller.value.isRecordingVideo) {
       // A recording is already started, do nothing.
@@ -148,17 +165,27 @@ class _CameraScreenState extends State<CameraScreen>
     try {
       _videoPath = filePath;
       await _controller.startVideoRecording(filePath);
+      return filePath;
     } on CameraException catch (e) {
+      _videoIndex--;
+      _deleteVideo(filePath);
       _showCameraException(e);
       return null;
     }
-    return filePath;
   }
 
   void _onVideoRecordStop() {
     _stopVideoRecording().then((_) {
+      widget.sentenceStructureCameraChips.removeAt(0);
+      if (widget.sentenceStructureCameraChips.length == 0) {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PredictionResultScreen(_videos),
+            ));
+        return;
+      }
       if (mounted) setState(() {});
-      // showInSnackBar('Video recorded to: $videoPath');
     });
   }
 
@@ -173,7 +200,6 @@ class _CameraScreenState extends State<CameraScreen>
       _showCameraException(e);
       return null;
     }
-
     await _startVideoPlayer();
   }
 
@@ -200,34 +226,33 @@ class _CameraScreenState extends State<CameraScreen>
     await vcontroller.play();
   }
 
-  // void _deleteVideo(String videoPath) async {}
+  void _deleteVideosDirectory() async {
+    final Directory extDir = await getApplicationDocumentsDirectory();
+    final String dirPath = '${extDir.path}/Movies/flutter_test';
+    await Directory(dirPath).delete(recursive: true);
+  }
 
-  void _showCameraException(CameraException e) {
-    logError(e.code, e.description);
-    _showInSnackBar('Error: ${e.code}\n${e.description}');
+  void _deleteVideo(String videoPath) async {
+    await File(videoPath).delete(recursive: false);
+  }
+
+  void _setActiveCategory() {
+    print(widget.sentenceStructureCameraChips[0]);
   }
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    initializeCamera(1);
-    /*
-    setState(() {
-      getCameras();
-      if (_controller != null) {
-        _controller.initialize().then((_) {
-          if (!mounted) return;
-        });
-      }
-    });
-    */
+    _initializeCamera(1);
+    _setActiveCategory();
+    _deleteVideosDirectory();
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    disposeControllers();
+    _disposeControllers();
     super.dispose();
   }
 
@@ -243,13 +268,11 @@ class _CameraScreenState extends State<CameraScreen>
         // final dir = Directory(dirPath);
         // dir.deleteSync(recursive: true);
       }
-      disposeControllers();
+      _disposeControllers();
     } else if (state == AppLifecycleState.resumed) {
       if (_controller != null) _onNewCameraSelected(_controller.description);
     }
   }
-
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
@@ -296,7 +319,11 @@ class _CameraScreenState extends State<CameraScreen>
         onPressed: _controller != null &&
                 _controller.value.isInitialized &&
                 !_controller.value.isRecordingVideo
-            ? _onVideoRecordButtonPressed
+            ? () {
+                var category =
+                    widget.sentenceStructureCameraChips[0].label as Text;
+                _onVideoRecordButtonPressed(category.data);
+              }
             : null,
       ),
       bottomNavigationBar: BottomAppBar(
@@ -333,23 +360,6 @@ class _CameraScreenState extends State<CameraScreen>
 
   /// Display the preview from the camera (or a message if the preview is not available).
   FutureBuilder<void> _cameraPreviewWidget() {
-    /*
-    if (_controller == null || !_controller.value.isInitialized) {
-      return Text(
-        'Tap a camera',
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 24.0,
-          fontWeight: FontWeight.w900,
-        ),
-      );
-    } else {
-      return AspectRatio(
-        aspectRatio: _controller.value.aspectRatio,
-        child: CameraPreview(_controller),
-      );
-    }
-    */
     return FutureBuilder<void>(
       future: _initializeControllerFuture,
       builder: (context, snapshot) {

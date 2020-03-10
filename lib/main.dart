@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lipify/screens/home_screen.dart';
+import 'package:lipify/screens/sentence_structure_screen.dart';
 
 void main() {
   // Ensure that plugin services are initialized so that `availableCameras()`
@@ -17,6 +18,10 @@ class LipifyApp extends StatelessWidget {
       title: 'Lipify',
       theme: ThemeData.dark(),
       home: HomeScreen(),
+      routes: {
+        '/sentenceStructureScreen': (BuildContext context) =>
+            SentenceStructureScreen()
+      },
     );
   }
 }

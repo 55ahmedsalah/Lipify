@@ -27,6 +27,26 @@ class _SentenceStructureScreenState extends State<SentenceStructureScreen> {
     );
   }
 
+  void _showCategoriesAlert() {
+    showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+              title: Row(
+                children: <Widget>[
+                  //Icon(Icons.error),
+                  Text('No Categories Selected'),
+                ],
+              ),
+              content: Text('Please select at least a single category'),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text('OK'),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ],
+            ));
+  }
+
   @override
   void initState() {
     super.initState();
@@ -53,6 +73,15 @@ class _SentenceStructureScreenState extends State<SentenceStructureScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
+              Flexible(
+                child: Hero(
+                  tag: 'logo',
+                  child: Image.asset(
+                    'images/logo.png',
+                    width: 150.0,
+                  ),
+                ),
+              ),
               Text(
                 'My sentence\'s structure will be:',
                 style: TextStyle(fontSize: 30.0),
@@ -91,9 +120,9 @@ class _SentenceStructureScreenState extends State<SentenceStructureScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        elevation: 4.0,
-        icon: const Icon(Icons.videocam),
-        label: const Text('Open Camera'),
+        elevation: _sentenceStructureChips.length > 0 ? 4.0 : null,
+        icon: Icon(Icons.videocam),
+        label: Text('Open Camera'),
         onPressed: _sentenceStructureChips.length > 0
             ? () => Navigator.push(
                   context,
@@ -102,7 +131,9 @@ class _SentenceStructureScreenState extends State<SentenceStructureScreen> {
                         CameraScreen(_sentenceStructureCameraChips),
                   ),
                 )
-            : null,
+            : () => _showCategoriesAlert(),
+        backgroundColor:
+            _sentenceStructureChips.length > 0 ? null : Colors.grey[400],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
@@ -122,6 +153,7 @@ class _SentenceStructureScreenState extends State<SentenceStructureScreen> {
                       deleteButtonTooltipMessage: 'Cancel',
                       deleteIconColor: Colors.red,
                       label: Text(category),
+                      padding: EdgeInsets.all(3.0),
                       onDeleted: () {
                         _pressed[category] = false;
                         _sentenceStructureCameraChips.removeWhere((Chip chip) {

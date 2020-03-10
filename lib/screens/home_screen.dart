@@ -19,9 +19,14 @@ class HomeScreen extends StatelessWidget {
                   style: kHomeScreenTextStyle,
                   textAlign: TextAlign.center,
                 ),
-                Image.asset(
-                  'images/logo.png',
-                  width: 200.0,
+                Flexible(
+                  child: Hero(
+                    tag: 'logo',
+                    child: Image.asset(
+                      'images/logo.png',
+                      width: 200.0,
+                    ),
+                  ),
                 ),
                 Text(
                   'Your Lip Reading Assistant',
