@@ -21,11 +21,12 @@ class CameraScreen extends StatefulWidget {
 class _CameraScreenState extends State<CameraScreen>
     with WidgetsBindingObserver {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  // List<CameraDescription> _cameras = [];
+  bool _videoRecordButtonPressed = false;
   CameraController _controller;
   CameraDescription _camera;
   Future<void> _initializeControllerFuture;
   int _videoIndex = 0;
-  // List<CameraDescription> _cameras = [];
   List<String> _videos = [];
   String _videoPath;
   VideoPlayerController _videoController;
@@ -42,7 +43,7 @@ class _CameraScreenState extends State<CameraScreen>
       // Get a specific camera from the list of available cameras.
       _camera,
       // Define the resolution to use.
-      ResolutionPreset.max,
+      ResolutionPreset.low,
       // Disable audio.
       enableAudio: false,
     );
@@ -75,7 +76,6 @@ class _CameraScreenState extends State<CameraScreen>
   }
 
   /*
-
   void _getCameras() async {
     try {
       _cameras = await availableCameras();
@@ -104,7 +104,7 @@ class _CameraScreenState extends State<CameraScreen>
     }
     _controller = CameraController(
       cameraDescription,
-      ResolutionPreset.max,
+      ResolutionPreset.low,
       enableAudio: false,
     );
 
@@ -129,12 +129,11 @@ class _CameraScreenState extends State<CameraScreen>
 
   void _onVideoRecordButtonPressed(String category) {
     _startVideoRecording(category).then((String filePath) {
-      if (mounted) setState(() {});
       if (filePath != null) {
         // File already exists or another camera exception is thrown
         _videos.add(filePath);
         Future.delayed(
-          Duration(seconds: 1),
+          Duration(milliseconds: 1200),
           () {
             if (_controller != null &&
                 _controller.value.isInitialized &&
@@ -142,6 +141,7 @@ class _CameraScreenState extends State<CameraScreen>
           },
         );
       }
+      if (mounted) setState(() {});
     });
   }
 
@@ -227,9 +227,13 @@ class _CameraScreenState extends State<CameraScreen>
   }
 
   void _deleteVideosDirectory() async {
-    final Directory extDir = await getApplicationDocumentsDirectory();
-    final String dirPath = '${extDir.path}/Movies/flutter_test';
-    await Directory(dirPath).delete(recursive: true);
+    try {
+      final Directory extDir = await getApplicationDocumentsDirectory();
+      final String dirPath = '${extDir.path}/Movies/flutter_test';
+      await Directory(dirPath).delete(recursive: true);
+    } catch (e) {
+      print(e);
+    }
   }
 
   void _deleteVideo(String videoPath) async {
@@ -278,30 +282,35 @@ class _CameraScreenState extends State<CameraScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      body: SafeArea(
-        child: Column(
-          children: <Widget>[
-            Expanded(
-              child: Container(
-                child: Padding(
-                  padding: EdgeInsets.all(1.0),
-                  child: Center(
-                    child: _cameraPreviewWidget(),
+      body: WillPopScope(
+        onWillPop: () => _videoRecordButtonPressed
+            ? Future.value(false)
+            : Future.value(true),
+        child: SafeArea(
+          child: Column(
+            children: <Widget>[
+              Expanded(
+                child: Container(
+                  child: Padding(
+                    padding: EdgeInsets.all(1.0),
+                    child: Center(
+                      child: _cameraPreviewWidget(),
+                    ),
                   ),
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                  border: Border.all(
-                    color: _controller != null &&
-                            _controller.value.isRecordingVideo
-                        ? Colors.redAccent
-                        : Colors.black,
-                    width: 2.0,
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    border: Border.all(
+                      color: _controller != null &&
+                              _controller.value.isRecordingVideo
+                          ? Colors.redAccent[700]
+                          : Colors.black,
+                      width: 2.0,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -312,14 +321,12 @@ class _CameraScreenState extends State<CameraScreen>
                 Icons.camera,
                 size: 35.0,
               )
-            : Icon(
-                Icons.close,
-                size: 35.0,
-              ),
+            : null, // Icon(Icons.close, size: 35.0),
         onPressed: _controller != null &&
                 _controller.value.isInitialized &&
                 !_controller.value.isRecordingVideo
             ? () {
+                _videoRecordButtonPressed = true;
                 var category =
                     widget.sentenceStructureCameraChips[0].label as Text;
                 _onVideoRecordButtonPressed(category.data);

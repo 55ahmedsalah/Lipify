@@ -29,27 +29,20 @@ class _SentenceStructureScreenState extends State<SentenceStructureScreen> {
 
   void _showCategoriesAlert() {
     showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-              title: Row(
-                children: <Widget>[
-                  //Icon(Icons.error),
-                  Text('No Categories Selected'),
-                ],
-              ),
-              content: Text('Please select at least a single category'),
-              actions: <Widget>[
-                FlatButton(
-                  child: Text('OK'),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ],
-            ));
-  }
-
-  @override
-  void initState() {
-    super.initState();
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text('No Categories Selected'),
+        content: Text('Please select at least a single category'),
+        actions: <Widget>[
+          FlatButton(
+            child: Text('OK'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -63,7 +56,6 @@ class _SentenceStructureScreenState extends State<SentenceStructureScreen> {
             icon: Icon(Icons.help),
             onPressed: () {
               _showAboutAlertDialog();
-              print(_sentenceStructureChips);
             },
           ),
         ],
@@ -83,7 +75,7 @@ class _SentenceStructureScreenState extends State<SentenceStructureScreen> {
                 ),
               ),
               Text(
-                'My sentence\'s structure will be:',
+                'My sentence structure will be:',
                 style: TextStyle(fontSize: 30.0),
               ),
               SizedBox(height: 10.0),
@@ -124,13 +116,15 @@ class _SentenceStructureScreenState extends State<SentenceStructureScreen> {
         icon: Icon(Icons.videocam),
         label: Text('Open Camera'),
         onPressed: _sentenceStructureChips.length > 0
-            ? () => Navigator.push(
+            ? () {
+                Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) =>
                         CameraScreen(_sentenceStructureCameraChips),
                   ),
-                )
+                );
+              }
             : () => _showCategoriesAlert(),
         backgroundColor:
             _sentenceStructureChips.length > 0 ? null : Colors.grey[400],
