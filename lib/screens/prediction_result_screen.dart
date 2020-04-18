@@ -5,8 +5,10 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:http/http.dart' as http;
 import 'package:lipify/screens/sentence_structure_screen.dart';
 
-const uploadVideoURL = 'http://196.221.116.58:3000/upload';
-const getPredictedTextURL = 'http://192.168.1.4:3000/text';
+// const uploadVideoURL = 'http://192.168.1.4:3000/upload';
+// const getPredictedTextURL = 'http://192.168.1.4:3000/text';
+const uploadVideoURL = 'http://lipify.herokuapp.com/upload';
+const getPredictedTextURL = 'http://lipify.herokuapp.com/text';
 
 class PredictionResultScreen extends StatefulWidget {
   final List<String> videoPaths;
