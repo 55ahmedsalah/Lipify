@@ -5,8 +5,8 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:http/http.dart' as http;
 import 'package:lipify/screens/sentence_structure_screen.dart';
 
-const uploadVideoURL = 'http://192.168.1.200:3000/upload';
-const getPredictedTextURL = 'http://192.168.1.200:3000/text';
+const uploadVideoURL = 'http://196.221.116.58:3000/upload';
+const getPredictedTextURL = 'http://192.168.1.4:3000/text';
 
 class PredictionResultScreen extends StatefulWidget {
   final List<String> videoPaths;
@@ -18,12 +18,21 @@ class PredictionResultScreen extends StatefulWidget {
 
 class _PredictionResultScreenState extends State<PredictionResultScreen> {
   bool _gettingData = true;
-  String _predictedText = 'please lay by blue';
+  String _predictedText = '';
 
-  Widget _loadingSpinKit = SpinKitDoubleBounce(
-    color: Colors.white,
-    size: 100.0,
+  Widget _loadingSpinKit = Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: <Widget>[
+      Text('Analyzing your videos...'),
+      SizedBox(height: 10.0),
+      SpinKitDoubleBounce(
+        color: Colors.white,
+        size: 100.0,
+      ),
+    ],
   );
+
+  Widget _error = Column();
 
   void sendVideos(String filename, String url) async {
     var request = http.MultipartRequest('POST', Uri.parse(url));
@@ -31,22 +40,55 @@ class _PredictionResultScreenState extends State<PredictionResultScreen> {
     try {
       // Adjust request timeout
       http.StreamedResponse response =
-          await request.send().timeout(Duration(minutes: 2));
+          await request.send().timeout(Duration(seconds: 5));
+      // await request.send().timeout(Duration(minutes: 2));
       if (response.statusCode == 200) {
         print('Success');
       } else {
         print(
             'Request failed with status: ${response.reasonPhrase} ${response.statusCode}.');
         setState(() {
-          _loadingSpinKit =
-              Text('Error! Check your internet connection and try again');
+          _loadingSpinKit = Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text('Error! Check your internet connection and try again'),
+              RaisedButton.icon(
+                icon: Icon(Icons.sync),
+                label: Text('New Sentence'),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SentenceStructureScreen(),
+                    ),
+                  );
+                },
+              ),
+            ],
+          );
         });
       }
     } catch (e) {
       print(e);
       setState(() {
-        _loadingSpinKit =
-            Text('Error! Check your internet connection and try again');
+        _loadingSpinKit = Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text('Error! Check your internet connection and try again'),
+            RaisedButton.icon(
+              icon: Icon(Icons.sync),
+              label: Text('New Sentence'),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SentenceStructureScreen(),
+                  ),
+                );
+              },
+            ),
+          ],
+        );
       });
     }
   }
@@ -63,15 +105,47 @@ class _PredictionResultScreenState extends State<PredictionResultScreen> {
         print(
             'Request failed with status: ${response.reasonPhrase} ${response.statusCode}.');
         setState(() {
-          _loadingSpinKit =
-              Text('Error! Check your internet connection and try again');
+          _loadingSpinKit = Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text('Error! Check your internet connection and try again'),
+              RaisedButton.icon(
+                icon: Icon(Icons.sync),
+                label: Text('New Sentence'),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SentenceStructureScreen(),
+                    ),
+                  );
+                },
+              ),
+            ],
+          );
         });
       }
     } catch (e) {
       print(e);
       setState(() {
-        _loadingSpinKit =
-            Text('Error! Check your internet connection and try again');
+        _loadingSpinKit = Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text('Error! Check your internet connection and try again'),
+            RaisedButton.icon(
+              icon: Icon(Icons.sync),
+              label: Text('New Sentence'),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SentenceStructureScreen(),
+                  ),
+                );
+              },
+            ),
+          ],
+        );
       });
     }
   }
@@ -101,20 +175,11 @@ class _PredictionResultScreenState extends State<PredictionResultScreen> {
                 : Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      Flexible(
-                        child: Image.asset(
-                          'images/logo.png',
-                          width: 200.0,
-                        ),
-                      ),
-                      Text('Predicted text is',
-                          style: TextStyle(fontSize: 30.0)),
-                      SizedBox(height: 10.0),
                       Text(
                         '$_predictedText',
                         style: TextStyle(fontSize: 30.0),
                       ),
-                      SizedBox(height: 15.0),
+                      SizedBox(height: 40.0),
                       RaisedButton.icon(
                         icon: Icon(Icons.sync),
                         label: Text('New Sentence'),
@@ -126,7 +191,7 @@ class _PredictionResultScreenState extends State<PredictionResultScreen> {
                             ),
                           );
                         },
-                      )
+                      ),
                     ],
                   ),
           ),

@@ -10,7 +10,6 @@ void main() {
 }
 
 class LipifyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -18,10 +17,6 @@ class LipifyApp extends StatelessWidget {
       title: 'Lipify',
       theme: ThemeData.dark(),
       home: HomeScreen(),
-      routes: {
-        '/sentenceStructureScreen': (BuildContext context) =>
-            SentenceStructureScreen()
-      },
     );
   }
 }

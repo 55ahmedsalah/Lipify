@@ -223,7 +223,9 @@ class _CameraScreenState extends State<CameraScreen>
         _videoController = vcontroller;
       });
     }
-    await vcontroller.play();
+    try {
+      await vcontroller.play();
+    } catch (e) {}
   }
 
   void _deleteVideosDirectory() async {
