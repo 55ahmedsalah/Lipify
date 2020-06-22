@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+
 import 'package:lipify/components/help_dialog.dart';
+import 'package:lipify/components/no_categories_selected_dialog.dart';
+
 import 'package:lipify/screens/camera_screen.dart';
 
 class SentenceStructureScreen extends StatefulWidget {
@@ -9,45 +12,55 @@ class SentenceStructureScreen extends StatefulWidget {
 }
 
 class _SentenceStructureScreenState extends State<SentenceStructureScreen> {
+  // Chips to be shown as user clicks on categories
   List<Chip> _sentenceStructureChips = [];
+
+  // Chips to be shown on the Camera Screen
   List<Chip> _sentenceStructureCameraChips = [];
+
+  // Is category pressed?
+  // Used to make categories clickable once
   Map<String, bool> _pressed = {
-    'Command': false,
-    'Color': false,
-    'Preposition': false,
-    'Letter': false,
-    'Digit': false,
-    'Adverb': false
+    'Adverb': false,
+    'Alphabet': false,
+    'Colors': false,
+    'Commands': false,
+    'Numbers': false,
+    'Prepositions': false,
   };
 
-  void _showAboutAlertDialog() {
+  // Show a help dialog when user clicks on the help button
+  void _showHelpDialog() {
     showDialog(
       context: context,
       builder: (_) => HelpDialog(),
     );
   }
 
+  // Remove category from chips array
+  void _removeSelectedCategory(String category) {
+    setState(() {
+      _pressed[category] = false;
+      _sentenceStructureCameraChips.removeWhere((Chip chip) {
+        return chip.label.toString() == Text(category).toString();
+      });
+      _sentenceStructureChips.removeWhere((Chip chip) {
+        return chip.label.toString() == Text(category).toString();
+      });
+    });
+  }
+
+  // Show an alert if the user clicks
+  // on the 'Open Camera' button without selecting any category
   void _showCategoriesAlert() {
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: Text('No Categories Selected'),
-        content: Text('Please select at least a single category'),
-        actions: <Widget>[
-          FlatButton(
-            child: Text('OK'),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-      ),
+      builder: (_) => NoCategoriesSelectedDialog(),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    setState(() {});
     return Scaffold(
       appBar: AppBar(
         title: Text('Sentence Structure'),
@@ -55,7 +68,7 @@ class _SentenceStructureScreenState extends State<SentenceStructureScreen> {
           IconButton(
             icon: Icon(Icons.help),
             onPressed: () {
-              _showAboutAlertDialog();
+              _showHelpDialog();
             },
           ),
         ],
@@ -76,24 +89,32 @@ class _SentenceStructureScreenState extends State<SentenceStructureScreen> {
               ),
               Text(
                 'My sentence structure will be:',
-                style: TextStyle(fontSize: 30.0),
+                textScaleFactor: 1.7,
+                style: TextStyle(fontWeight: FontWeight.w400),
+                textAlign: TextAlign.center,
               ),
               SizedBox(height: 10.0),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
-                  _raisedButton('Command'),
-                  _raisedButton('Color'),
-                  _raisedButton('Preposition'),
+                  _categoryButton('Adverb'),
+                  _categoryButton('Alphabet'),
                 ],
               ),
               SizedBox(height: 5.0),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
-                  _raisedButton('Letter'),
-                  _raisedButton('Digit'),
-                  _raisedButton('Adverb'),
+                  _categoryButton('Colors'),
+                  _categoryButton('Commands'),
+                ],
+              ),
+              SizedBox(height: 5.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  _categoryButton('Numbers'),
+                  _categoryButton('Prepositions'),
                 ],
               ),
               SizedBox(height: 5.0),
@@ -133,40 +154,50 @@ class _SentenceStructureScreenState extends State<SentenceStructureScreen> {
     );
   }
 
-  Widget _raisedButton(String category) {
-    return RaisedButton(
-      onPressed: _pressed[category]
-          ? null
-          : () => setState(
-                () {
-                  _sentenceStructureCameraChips
-                      .add(Chip(label: Text(category)));
-                  _sentenceStructureChips.add(
-                    Chip(
-                      deleteIcon: Icon(Icons.close),
-                      deleteButtonTooltipMessage: 'Cancel',
-                      deleteIconColor: Colors.red,
-                      label: Text(category),
-                      padding: EdgeInsets.all(3.0),
-                      onDeleted: () {
-                        _pressed[category] = false;
-                        _sentenceStructureCameraChips.removeWhere((Chip chip) {
-                          return chip.label.toString() ==
-                              Text(category).toString();
-                        });
-                        _sentenceStructureChips.removeWhere((Chip chip) {
-                          return chip.label.toString() ==
-                              Text(category).toString();
-                        });
-                        setState(() {});
-                      },
-                      elevation: 2.0,
-                    ),
+  // Category button
+  Widget _categoryButton(String category) {
+    return Expanded(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 15.0),
+        child: RaisedButton(
+          onPressed: _pressed[category]
+              ? null
+              : () {
+                  setState(
+                    () {
+                      _sentenceStructureCameraChips
+                          .add(Chip(label: Text(category)));
+                      _sentenceStructureChips.add(
+                        Chip(
+                          deleteIcon: Icon(Icons.cancel),
+                          deleteButtonTooltipMessage: 'Remove category',
+                          deleteIconColor: Color(0xFFC7042C),
+                          label: Text(category),
+                          padding: EdgeInsets.all(3.0),
+                          onDeleted: () {
+                            _pressed[category] = false;
+                            _sentenceStructureCameraChips
+                                .removeWhere((Chip chip) {
+                              return chip.label.toString() ==
+                                  Text(category).toString();
+                            });
+                            _sentenceStructureChips.removeWhere((Chip chip) {
+                              return chip.label.toString() ==
+                                  Text(category).toString();
+                            });
+                            setState(() {});
+                          },
+                          elevation: 2.0,
+                        ),
+                      );
+                      _pressed[category] = true;
+                    },
                   );
-                  _pressed[category] = true;
                 },
-              ),
-      child: Text(category),
+          child: Text(category),
+          color: _pressed[category] ? Colors.grey : null,
+        ),
+      ),
     );
   }
 }

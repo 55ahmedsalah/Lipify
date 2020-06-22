@@ -12,6 +12,12 @@
 	<string>6.0</string>
 	<key>CFBundleName</key>
 	<string>lipify</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Get video from photo library</string>
+	<key>NSCameraUsageDescription </key>
+	<string>Get video from camera</string>
+	<key>NSMicrophoneUsageDescription </key>
+	<string>Use microphone for video audio</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>

@@ -1,13 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lipify/screens/sentence_structure_screen.dart';
-import 'package:lipify/styles.dart';
 
 class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(title: Text('Lipify')),
       body: SafeArea(
         child: Container(
           child: Center(
@@ -16,7 +14,7 @@ class HomeScreen extends StatelessWidget {
               children: <Widget>[
                 Text(
                   'Welcome to Lipify',
-                  style: kHomeScreenTextStyle,
+                  style: TextStyle(fontSize: 30.0),
                   textAlign: TextAlign.center,
                 ),
                 Flexible(
@@ -30,7 +28,7 @@ class HomeScreen extends StatelessWidget {
                 ),
                 Text(
                   'Your Lip Reading Assistant',
-                  style: kHomeScreenTextStyle,
+                  style: TextStyle(fontSize: 30.0),
                   textAlign: TextAlign.center,
                 ),
               ],

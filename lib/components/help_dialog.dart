@@ -17,7 +17,7 @@ class HelpDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Text(
-                'Choose your scentence structure by clicking in order the category of each word.\n\n'),
+                'Choose your sentence structure by clicking in order the category of each word.\n\n'),
             Text('Command category words: \n • bin • lay • place • set\n'),
             Text('Color category words: \n • blue • green • red\n • white\n'),
             Text('Preposition category words: \n • at • by • in • with\n'),
